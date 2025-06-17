@@ -134,6 +134,7 @@ pj() {
       -u | --unpushed)
         # Loop through each line in projects.txt
         current_dir=$(pwd)
+        allpushed=yes
         while IFS= read -r line; do
           # Extract directory path
           dir_path=${line/*:::/}
@@ -144,11 +145,15 @@ pj() {
             if [ -d ".git" ]; then
               # Check for unpushed commits
               if [ "$(git cherry -v)" ]; then
-                echo "Unpushed commits in: $project_name"
+                echo "$project_name has unpushed commits"
+                allpushed=no
               fi
             fi
           fi
         done <"$projects_txt"
+        if [ "$allpushed" == "yes" ]; then
+          echo "no unpushed commits"
+        fi
         cd "$current_dir"
         return
         ;;
