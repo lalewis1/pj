@@ -1,0 +1,52 @@
+--- pj the ProJect switcher ---
+
+Easily switch between projects
+
+USAGE
+
+    $ pj [OPTION] [PATTERN]
+
+[PATTERN]
+
+    Without a preceding [OPTION] pj will use [PATTERN] to 
+    determine the project to switch to using a regex search
+    on the available project names. It will fail if there
+    is more than one match or if there are no matches.
+
+    Tab completion is available.
+
+    See below for usage with [OPTIONS]
+
+    If neither [OPTIONS] or [PATTERN] are provided then
+    pj will open fzf for you to select a project interactively.
+
+
+[OPTIONS]
+
+    -h|--help|help
+        Display this message and exit
+
+    -a|--add
+        Add the current dir to the project list,
+        if [PATTERN] is given it will be used as the
+        project name. Otherwise the name of the current
+        directory will be used.
+
+    -r|--remove
+        Remove a project from the project list
+        if no pattern is provided pj will open
+        fzf for you to select a project interactively.
+
+    -l|--list
+        Echo the available project names to stdout.
+        one project per line
+
+    -e|--edit
+        Open the projects file for editing with $EDITOR.
+        falls back to system default if not set.
+
+    -c|--clean
+        Remove orphaned projects from the projects file.
+
+    -u|--unpushed
+        Check registered projects for unpushed commits.
