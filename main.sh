@@ -144,8 +144,12 @@ pj() {
             cd "$dir_path"
             if [ -d ".git" ]; then
               # Check for unpushed commits
-              if [ "$(git cherry -v)" ]; then
-                echo "$project_name has unpushed commits"
+              msg="$(git cherry -v 2>/dev/null)"
+              if ! [ $? = 0 ] ; then
+                echo "$project_name ($(git branch --show-current)) has no upstream"
+              elif [ "$msg" ]; then
+                echo "$project_name has unpushed commits:"
+                echo "$msg"
                 allpushed=no
               fi
             fi
