@@ -145,11 +145,16 @@ pj() {
             if [ -d ".git" ]; then
               # Check for unpushed commits
               msg="$(git cherry -v 2>/dev/null)"
-              if ! [ $? = 0 ] ; then
+              if ! [ $? = 0 ]; then
                 echo "$project_name ($(git branch --show-current)) has no upstream"
               elif [ "$msg" ]; then
                 echo "$project_name has unpushed commits:"
                 echo "$msg"
+                allpushed=no
+              fi
+              # Check for dirty worktree (uncommitted changes)
+              if [ -n "$(git status --porcelain)" ]; then
+                echo "$project_name has a dirty worktree (uncommitted changes)"
                 allpushed=no
               fi
             fi
