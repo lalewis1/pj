@@ -28,11 +28,18 @@ av() {
 pj() {
   # if no arguments given, interactively select the project with fzf
   if [ $# -eq 0 ]; then
-    target_dir=$(sed "s/:::.*//" "$projects_txt" | fzf | xargs -I {} grep "^{}:::" $projects_txt | sed "s/.*::://")
+    target_line=$(sed "s/:::.*//" "$projects_txt" | fzf | xargs -I {} grep "^{}:::" $projects_txt)
+    target_dir=${target_line##*:::}
     # if operation cancelled
     if [ -z "$target_dir" ]; then
       return 0
     fi
+    # Move the selected line to the top of projects_txt
+    tmpfile=$(mktemp)
+    grep -vFx "$target_line" "$projects_txt" >"$tmpfile"
+    echo "$target_line" >"$projects_txt"
+    cat "$tmpfile" >>"$projects_txt"
+    rm "$tmpfile"
     # if venv is active, deactivate it
     if [ -n "${VIRTUAL_ENV}" ]; then
       deactivate
@@ -141,7 +148,7 @@ pj() {
           project_name=${line/:::*/}
           # Check if directory exists
           if [ -d "$dir_path" ]; then
-            cd "$dir_path"
+            cd "$dir_path" || return
             if [ -d ".git" ]; then
               # Check for unpushed commits
               msg="$(git cherry -v 2>/dev/null)"
@@ -163,7 +170,7 @@ pj() {
         if [ "$allpushed" == "yes" ]; then
           echo "no unpushed commits"
         fi
-        cd "$current_dir"
+        cd "$current_dir" || return
         return
         ;;
       -*)
@@ -172,12 +179,20 @@ pj() {
         ;;
       *)
         # search for project to switch to using supplied args
-        matches=$(grep -c "^${1}.*:::" $projects_txt)
+        project_line=$(grep "^${1}.*:::" "$projects_txt")
+        matches=$(echo "$project_line" | wc -l)
         if [ "$matches" -ne 1 ]; then
           echo "unable to determine project"
           return 1
         fi
-        pj_dir=$(grep "^${1}.*:::" $projects_txt | sed "s/.*::://")
+        # Move the selected line to the top (recency bonus)
+        tmpfile=$(mktemp)
+        grep -vFx "$project_line" "$projects_txt" >"$tmpfile"
+        echo "$project_line" >"$projects_txt"
+        cat "$tmpfile" >>"$projects_txt"
+        rm "$tmpfile"
+        # Extract directory using Bash substring
+        pj_dir=${project_line##*::}
         if [ -n "${VIRTUAL_ENV}" ]; then
           deactivate
         fi
