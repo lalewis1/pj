@@ -28,7 +28,7 @@ av() {
 pj() {
   # if no arguments given, interactively select the project with fzf
   if [ $# -eq 0 ]; then
-    target_line=$(sed "s/:::.*//" "$projects_txt" | fzf | xargs -I {} grep "^{}:::" $projects_txt)
+    target_line=$(sed "s/:::.*//" "$projects_txt" | fzf --scheme=history | xargs -I {} grep "^{}:::" $projects_txt)
     target_dir=${target_line##*:::}
     # if operation cancelled
     if [ -z "$target_dir" ]; then
@@ -89,7 +89,7 @@ pj() {
           sed -i "/^${2}:::.*/d" "$projects_txt"
         else
           # no project name given, do interactive selection with fzf
-          target_project=$(sed "s/:::.*//" "$projects_txt" | fzf)
+          target_project=$(sed "s/:::.*//" "$projects_txt" | fzf --scheme=history)
           if [ -z "$target_project" ]; then
             # no selection made
             return 0
